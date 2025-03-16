@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">android practicum custom view</string>
+    <string name="xml_screen">XML View</string>
+    <string name="compose_screen">Compose</string>
+</resources>
