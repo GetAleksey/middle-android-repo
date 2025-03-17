@@ -7,7 +7,6 @@ import android.widget.TextView
 import androidx.activity.ComponentActivity
 import com.example.androidpracticumcustomview.ui.theme.CustomContainer
 
-
 class XmlActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,14 +21,14 @@ class XmlActivity : ComponentActivity() {
         }
 
         val firstView = TextView(this).apply {
-            // TODO
-            // ...
+            text = "First view"
         }
 
         val secondView = TextView(this).apply {
-            // TODO
-            // ...
+            text = "Second view"
         }
+
+        customContainer.addView(firstView)
 
         // Добавление второго элемента через некоторое время (например, по задержке)
         Handler(Looper.getMainLooper()).postDelayed({
