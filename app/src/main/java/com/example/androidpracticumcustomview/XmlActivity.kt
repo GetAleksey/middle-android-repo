@@ -21,11 +21,11 @@ class XmlActivity : ComponentActivity() {
         }
 
         val firstView = TextView(this).apply {
-            text = "First view"
+            text = context.getString(R.string.first_child_text)
         }
 
         val secondView = TextView(this).apply {
-            text = "Second view"
+            text = context.getString(R.string.second_child_text)
         }
 
         customContainer.addView(firstView)

@@ -5,14 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
-/*
-Задание:
-Реализуйте необходимые компоненты.
-*/
+import androidx.compose.ui.res.stringResource
+import com.example.androidpracticumcustomview.R
 
 @Composable
 fun MainScreen(closeActivity: () -> Unit) {
@@ -24,15 +22,12 @@ fun MainScreen(closeActivity: () -> Unit) {
                 .clickable { closeActivity.invoke() },
             contentAlignment = Alignment.Center
         ) {
-
             CustomContainerCompose(
                 firstChild = {
-                    // TODO
-                    // ...
+                    Text(text = stringResource(R.string.first_child_text))
                 },
                 secondChild = {
-                    // TODO
-                    // ...
+                    Text(text = stringResource(R.string.second_child_text))
                 }
             )
         }
