@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewTreeObserver.OnPreDrawListener
 import android.widget.FrameLayout
 
 private const val MAX_CHILD_COUNT = 2
@@ -71,15 +72,23 @@ class CustomContainer @JvmOverloads constructor(
             error("Cannot add more than $MAX_CHILD_COUNT children")
         }
 
-        child.post {
-            val initialTranslation = when (child) {
-                firstChild -> height / 2 - child.measuredHeight / 2
-                secondChild -> child.measuredHeight / 2 - height / 2
-                else -> 0
-            }
+        child.viewTreeObserver.addOnPreDrawListener(
+            object : OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    child.viewTreeObserver.removeOnPreDrawListener(this)
 
-            animateAppearance(child, initialTranslation.toFloat())
-        }
+                    val initialTranslation = when (child) {
+                        firstChild -> height / 2 - child.measuredHeight / 2
+                        secondChild -> child.measuredHeight / 2 - height / 2
+                        else -> 0
+                    }
+
+                    animateAppearance(child, initialTranslation.toFloat())
+
+                    return false
+                }
+            }
+        )
 
         super.addView(child)
     }
