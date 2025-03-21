@@ -5,10 +5,15 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onSizeChanged
 import kotlinx.coroutines.launch
 
 private const val DEFAULT_TRANSLATION_DURATION_MS = 5000
@@ -22,8 +27,23 @@ fun CustomContainerCompose(
     firstChild: @Composable (() -> Unit)? = null,
     secondChild: @Composable (() -> Unit)? = null
 ) {
-    val offsetAnimation = remember { Animatable(1f) }
     val alphaAnimation = remember { Animatable(0f) }
+    val offsetAnimation = remember { Animatable(1f) }
+    var containerHeight by remember { mutableIntStateOf(0) }
+    var firstChildHeight by remember { mutableIntStateOf(0) }
+    var secondChildHeight by remember { mutableIntStateOf(0) }
+
+    val firstChildTranslationY by remember {
+        derivedStateOf {
+            calculateTranslationY(containerHeight, firstChildHeight, offsetAnimation.value)
+        }
+    }
+
+    val secondChildTranslationY by remember {
+        derivedStateOf {
+            -1 * calculateTranslationY(containerHeight, secondChildHeight, offsetAnimation.value)
+        }
+    }
 
     LaunchedEffect(Unit) {
         launch {
@@ -44,18 +64,32 @@ fun CustomContainerCompose(
     Layout(
         content = {
             firstChild?.also { item ->
-                Box(modifier = Modifier.alpha(alphaAnimation.value)) {
+                Box(
+                    modifier = Modifier
+                        .onSizeChanged { size -> firstChildHeight = size.height }
+                        .graphicsLayer {
+                            translationY = firstChildTranslationY
+                            alpha = alphaAnimation.value
+                        }
+                ) {
                     item()
                 }
             }
 
             secondChild?.also { item ->
-                Box(modifier = Modifier.alpha(alphaAnimation.value)) {
+                Box(
+                    modifier = Modifier
+                        .onSizeChanged { size -> secondChildHeight = size.height }
+                        .graphicsLayer {
+                            translationY = secondChildTranslationY
+                            alpha = alphaAnimation.value
+                        }
+                ) {
                     item()
                 }
             }
         },
-        modifier = modifier
+        modifier = modifier.onSizeChanged { size -> containerHeight = size.height }
     ) { measurables, constraints ->
         val placeables = measurables.map { measurable ->
             measurable.measure(constraints)
@@ -66,13 +100,11 @@ fun CustomContainerCompose(
 
         layout(width, height) {
             placeables.forEachIndexed { index, placeable ->
-                val offset = calculateOffset(height, placeable.height, offsetAnimation.value)
-
                 placeable.place(
                     x = (width - placeable.width) / 2,
                     y = when (index) {
-                        0 -> 0 + offset
-                        else -> height - placeable.height - offset
+                        0 -> 0
+                        else -> height - placeable.height
                     }
                 )
             }
@@ -80,5 +112,5 @@ fun CustomContainerCompose(
     }
 }
 
-private fun calculateOffset(parentHeight: Int, childHeight: Int, fraction: Float) =
-    ((parentHeight - childHeight) / 2 * fraction).toInt()
+private fun calculateTranslationY(parentHeight: Int, childHeight: Int, fraction: Float) =
+    (parentHeight - childHeight) / 2 * fraction

@@ -24,8 +24,6 @@ class CustomContainer @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        ensureValidChildCount()
-
         val width = MeasureSpec.getSize(widthMeasureSpec)
         val height = MeasureSpec.getSize(heightMeasureSpec)
 
@@ -36,12 +34,6 @@ class CustomContainer @JvmOverloads constructor(
         secondChild?.measure(childWidthMeasureSpec, childHeightMeasureSpec)
 
         setMeasuredDimension(width, height)
-    }
-
-    private fun ensureValidChildCount() {
-        if (childCount > MAX_CHILD_COUNT) {
-            error("Child count exceeds the limit of $MAX_CHILD_COUNT")
-        }
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -68,10 +60,18 @@ class CustomContainer @JvmOverloads constructor(
     }
 
     override fun addView(child: View) {
+        ensureValidChildCount()
+        scheduleAppearanceAnimation(child)
+        super.addView(child)
+    }
+
+    private fun ensureValidChildCount() {
         if (childCount >= MAX_CHILD_COUNT) {
             error("Cannot add more than $MAX_CHILD_COUNT children")
         }
+    }
 
+    private fun scheduleAppearanceAnimation(child: View) {
         child.viewTreeObserver.addOnPreDrawListener(
             object : OnPreDrawListener {
                 override fun onPreDraw(): Boolean {
@@ -89,8 +89,6 @@ class CustomContainer @JvmOverloads constructor(
                 }
             }
         )
-
-        super.addView(child)
     }
 
     private fun animateAppearance(child: View, initialTranslation: Float) {
